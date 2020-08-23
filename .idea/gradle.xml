@@ -13,7 +13,7 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/platform" />
             <option value="$PROJECT_DIR$/platform/core" />
-            <option value="$PROJECT_DIR$/platform/service" />
+            <option value="$PROJECT_DIR$/platform/shared" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
