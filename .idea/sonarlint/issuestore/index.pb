@@ -11,5 +11,5 @@ X
 local.properties,0/7/0712df971a99ac4d2fccb8e0fb19f377f3374cca
 A
 gradle.properties,2/a/2afbb999f001938c88fa43fc2ef52abf0f8213e4
-S
-#platform/service/proguard-rules.pro,d/d/ddda5ff2abba4af26bd13553ecb37d135b1c21a3
+Š
+Zplatform/core/src/main/java/br/com/mining/mobile/core/service/messaging/enums/MqttState.kt,6/0/60fdf6831958820694cd34ec2f821bf9ef4d382a
