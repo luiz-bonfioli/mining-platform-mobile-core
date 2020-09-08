@@ -1,6 +1,7 @@
 package br.com.mining.platform.service
 
 import android.os.Environment
+import android.util.Log
 import br.com.mining.platform.service.messaging.MqttResult
 import br.com.mining.platform.service.messaging.enums.MqttState
 import br.com.mining.platform.service.messaging.listeners.MqttMessageListener
@@ -8,15 +9,14 @@ import org.eclipse.paho.client.mqttv3.*
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence
 import java.io.File
 
-class MqttService(
-    val mqttMessageCallback: MqttMessageListener
-) : MqttCallbackExtended {
+class MqttService(val mqttMessageCallback: MqttMessageListener) : MqttCallbackExtended {
 
     companion object {
         private const val QOS_0 = 0
         private const val QOS_1 = 1
         private const val QOS_2 = 2
         private const val TIME_WAIT = 5000
+        private const val TAG = "MqttService"
     }
 
     private val FILE = "${File.separator}mining${File.separator}platform${File.separator}"
@@ -40,6 +40,7 @@ class MqttService(
                 mqttMessageCallback.onUpdateState(MqttResult(MqttState.PUBLISH_ERROR))
             }
         } catch (ex: Exception) {
+            ex.printStackTrace()
             mqttMessageCallback.onUpdateState(MqttResult(MqttState.PUBLISH_ERROR, ex.message ?: ""))
         }
     }
@@ -53,12 +54,8 @@ class MqttService(
                 mqttMessageCallback.onUpdateState(MqttResult(MqttState.SUBSCRIBE_ERROR))
             }
         } catch (ex: Exception) {
-            mqttMessageCallback.onUpdateState(
-                MqttResult(
-                    MqttState.SUBSCRIBE_ERROR,
-                    ex.message ?: ""
-                )
-            )
+            ex.printStackTrace()
+            mqttMessageCallback.onUpdateState(MqttResult(MqttState.SUBSCRIBE_ERROR, ex.message ?: ""))
         }
     }
 
@@ -67,12 +64,8 @@ class MqttService(
             mqttClient?.unsubscribe(topic)
             mqttMessageCallback.onUpdateState(MqttResult(MqttState.UNSUBSCRIBE))
         } catch (ex: MqttException) {
-            mqttMessageCallback.onUpdateState(
-                MqttResult(
-                    MqttState.UNSUBSCRIBE_ERROR,
-                    ex.message ?: ""
-                )
-            )
+            ex.printStackTrace()
+            mqttMessageCallback.onUpdateState(MqttResult(MqttState.UNSUBSCRIBE_ERROR, ex.message ?: ""))
         }
     }
 
@@ -85,6 +78,7 @@ class MqttService(
                 mqttClient?.reconnect()
             }
         } catch (e: MqttException) {
+            e.printStackTrace()
             mqttMessageCallback.onUpdateState(MqttResult(MqttState.DISCONNECTED, e.message ?: ""))
         }
     }
@@ -98,6 +92,7 @@ class MqttService(
                 mqttMessageCallback.onUpdateState(MqttResult(MqttState.CLOSE))
             }
         } catch (ex: Exception) {
+            ex.printStackTrace()
             mqttMessageCallback.onUpdateState(MqttResult(MqttState.ERROR, ex.message ?: ""))
         }
     }
@@ -109,36 +104,27 @@ class MqttService(
                 mqttMessageCallback.onUpdateState(MqttResult(MqttState.DISCONNECTED))
             }
         } catch (ex: Exception) {
-            mqttMessageCallback.onUpdateState(MqttResult(MqttState.ERROR, ex.message ?: ""))
-        }
-    }
-
-    private fun configureClient(clientId: String, serverUri: String) {
-        try {
-            mqttClient = MqttClient(serverUri, clientId, createPersistence())
-            mqttClient?.timeToWait = TIME_WAIT.toLong()
-            mqttClient?.setCallback(this)
-        } catch (ex: MqttException) {
+            ex.printStackTrace()
             mqttMessageCallback.onUpdateState(MqttResult(MqttState.ERROR, ex.message ?: ""))
         }
     }
 
     private fun createPersistence(): MqttClientPersistence {
-        return MqttDefaultFilePersistence(
-            Environment.getExternalStorageDirectory()
-                .toString() + FILE
-        )
+        return MqttDefaultFilePersistence(Environment.getExternalStorageDirectory().toString() + FILE)
     }
 
     private fun connect(
-        clientId: String, host: String, port: String, userName: String,
-        password: String
+        clientId: String, host: String, port: String, userName: String, password: String
     ) {
         val serverUri = "tcp://$host:$port"
         try {
             if (mqttClient == null) {
                 mqttMessageCallback.onUpdateState(MqttResult(MqttState.CONECTING))
-                configureClient(clientId, serverUri)
+
+                mqttClient = MqttClient(serverUri, clientId, createPersistence())
+                mqttClient?.timeToWait = TIME_WAIT.toLong()
+                mqttClient?.setCallback(this)
+
                 val mqttConnectOptions = MqttConnectOptions()
                 mqttConnectOptions.mqttVersion = MqttConnectOptions.MQTT_VERSION_3_1_1
                 mqttConnectOptions.isAutomaticReconnect = true
@@ -151,6 +137,7 @@ class MqttService(
                 mqttClient?.connect(mqttConnectOptions)
             }
         } catch (ex: MqttException) {
+            ex.printStackTrace()
             mqttMessageCallback.onUpdateState(MqttResult(MqttState.DISCONNECTED, ex.message ?: ""))
         }
     }
@@ -162,6 +149,7 @@ class MqttService(
 
     @Throws(Exception::class)
     override fun messageArrived(topic: String, message: MqttMessage) {
+        Log.d(TAG, topic)
         mqttMessageCallback.onMessageArrived(message.payload, topic)
     }
 

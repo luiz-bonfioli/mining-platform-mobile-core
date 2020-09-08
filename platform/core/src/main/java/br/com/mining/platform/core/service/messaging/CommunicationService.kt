@@ -1,10 +1,12 @@
-package br.com.mining.platform.service.messaging
+package br.com.mining.platform.core.service.messaging
 
 import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Intent
 import android.os.*
 import br.com.mining.platform.service.MqttService
+import br.com.mining.platform.service.messaging.MqttConstants
+import br.com.mining.platform.service.messaging.MqttResult
 import br.com.mining.platform.service.messaging.listeners.MqttMessageListener
 import java.nio.ByteBuffer
 
